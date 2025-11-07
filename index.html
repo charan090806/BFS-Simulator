@@ -130,20 +130,14 @@
             text-align: right;
             margin-top: 10px;
         }
-        #dialogButtons button {
-            padding: 5px 10px;
-            margin-left: 5px;
-            border-radius: 4px;
-            font-weight: normal;
-        }
         #dialogButtons button.confirm {
-             background: #FFA4A4;
-             color: white;
+            background: #FFA4A4;
+            color: white;
         }
         
         #dialogButtons button.cancel {
-             background: #BADFDB;
-             color: #111;
+            background: #BADFDB;
+            color: #111;
         }
 
         /* --- Developed By Modal Layout --- */
@@ -177,12 +171,6 @@
             object-fit: cover;
             margin-bottom: 10px;
         }
-        .profile-details {
-            /* Flexbox for inline content within card, or block elements inside */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
         .inline-detail {
             /* Style for the container holding Reg No and Email on the same line */
             display: flex;
@@ -191,6 +179,26 @@
             gap: 10px;
             margin: 5px 0;
             font-size: 14px; /* Optional: smaller font for inline details */
+        }
+
+        /* --- NEW: Video container styles for responsiveness --- */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: #000;
+            margin: 10px auto;
+            border-radius: 5px;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
         }
     </style>
 </head>
@@ -214,6 +222,7 @@
 
 <button onclick="toggleEdgeMode()">Node/Edge</button>
 <button onclick="undo()">Undo</button>
+<button onclick="redo()">Redo</button> 
 <button onclick="resetGraph()">Reset All</button>
 <span id="modeLabel" style="margin-left:10px; font-weight:bold; color:#FFA4A4">
     Mode: Node Creation
@@ -252,8 +261,18 @@
     <h3>🧠 Learn BFS & Application</h3>
     <div class="modal-content">
         <h4>What is BFS?</h4>
-        <p>Breadth-First Search (BFS) is an algorithm for traversing or searching tree or graph data structures. It starts at the tree root (or some arbitrary node of a graph, sometimes referred to as a 'search key') and explores all of the neighbor nodes at the present depth prior to moving on to the nodes at the next depth level.</p>
-
+        <p>Breadth-First Search (BFS) is a fundamental graph traversal algorithm used to explore nodes level by level. Starting from a chosen source node, BFS visits all its immediate neighbors first, then moves to the neighbors of those neighbors, continuing outward like a wave. Because of this layered exploration, BFS is ideal for finding the shortest path in an unweighted graph, where every edge is treated as having equal cost.</p>
+        <p>BFS uses a queue to store nodes in the order they must be visited. It begins by marking the start node as visited, pushing it into the queue, and then repeatedly removing a node from the front of the queue and visiting all its unvisited neighbors. This ensures a systematic left-to-right and top-to-bottom exploration.</p>
+        <p><b>Time Complexity</b>: O(V + E) where V = number of vertices, E = number of edges.</p>
+        <p><b>Space Complexity</b>: O(V) for visited arrays, parent tracking, and queue storage.</p>
+        <h4>Algorithm Steps</h4>
+        <ul>
+            <li>Initialize an empty queue.</li>
+            <li>Mark the start node as visited and enqueue it.</li>
+            <li>While the queue is not empty:</li>
+            <li>Dequeue a node.</li>
+            <li>Visit all unvisited neighbors and enqueue them.</li>
+        </ul>
         <h4>Application of BFS:</h4>
         <ul>
             <li>Shortest Path: BFS finds the shortest path between two nodes in an unweighted graph (treating all edges as weight 1). This application is used here!</li>
@@ -267,6 +286,19 @@
             <li>Distance: The minimum number of edges (hops) required to travel from the start node to the destination node. '∞' means the node is unreachable.</li>
             <li>Shortest Path: The sequence of nodes taken to achieve that shortest distance.</li>
         </ul>
+
+        <hr>
+        
+        <h4>📺 Video Demonstration</h4>
+        <div class="video-container">
+            <iframe 
+                src="Breadth First Search (BFS)_ Visualized and Explained.mp4" 
+                title="BFS Algorithm Explanation" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
     </div>
     <button class="close" onclick="closeModal('infoModal')">Close</button>
 </div>
@@ -274,33 +306,31 @@
 <div id="devModal" class="modal">
     <h3>👨‍💻 Developed By</h3>
     <div class="modal-content">
-        <h4>Team Members:</h4>
+        
         
         <div class="dev-team-row">
             <div class="dev-profile-card">
-                <img src="charan .jpg" alt="P.A.Krishna Charan" class="dev-photo">
+                <img src="https://via.placeholder.com/100/FFA4A4/FFFFFF?text=KC" alt="P.A.Krishna Charan" class="dev-photo">
                 <h4 style="color:#FFA4A4; margin-top: 5px;">P. A. Krishna Charan (Student)</h4>
                 <div class="inline-detail">
                     <span>Reg No: 24BCE5247</span>
-                    <span>Email: krishnacharan.pa2024@vitstudent.ac.in</span>
+                    
                 </div>
             </div>
 
             <div class="dev-profile-card">
-                <img src="charan .jpg" alt="V. Angeline" class="dev-photo">
+                 <img src="https://via.placeholder.com/100/BADFDB/111111?text=VA" alt="V. Angeline" class="dev-photo">
                 <h4 style="color:#FFA4A4; margin-top: 5px;">V. Angeline (Student)</h4>
                 <div class="inline-detail">
                     <span>Reg No: 24BCE5383</span>
-                    <span>Email: angeline.vara2024@vitstudent.ac.in</span>
+                    
                 </div>
             </div>
         </div>
 
         <div class="dev-profile-center">
-            <img src="faculty.jpg" alt="Prof. A.Swaminathan" class="dev-photo">
+            <img src="https://via.placeholder.com/100/FFD700/111111?text=Fac" alt="Prof. A.Swaminathan" class="dev-photo">
             <h4 style="color:#FFA4A4; margin-top: 5px;">Prof. A. Swaminathan (Faculty Mentor)</h4>
-            <p style="margin: 5px 0;">Name: Prof. A.Swaminathan</p>
-            <p style="margin: 5px 0;">Designation: [Insert Faculty Designation Here]</p>
         </div>
     </div>
     <button class="close" onclick="closeModal('devModal')">Close</button>
@@ -316,12 +346,12 @@
             <li>Manual Creation:
                 <ul>
                     <li>Create Node: Click any empty space in the blue canvas. A dialog will pop up to name the node.</li>
-                    <li>Create Edge: Click the Node/Edge button to switch to Edge Mode. Click the starting node (it turns yellow), then click the ending node.</li>
+                    <li>Create Edge: Click the Node/Edge button to switch to **"Mode: Add Directed Edge"**. Click the starting node (it turns yellow), then click the ending node. A dialog will appear to **set the weight for this directed edge** (A $\rightarrow$ B). To make it bidirectional (A $\leftrightarrow$ B), you must repeat the process in reverse (B, then A) and set a potentially different weight.</li>
                 </ul>
             </li>
         </ul>
-        <h4>2. Editing/Viewing Edges:</h4>
-        <p>To change the weight of an edge, Left-Click directly on the weight value (e.g., w=10) displayed on the edge.</p>
+        <h4>2. Editing Weights:</h4>
+        <p>To change the weight of an **existing directed** edge, Left-Click directly on the weight value (e.g., w=10) displayed on the edge.</p>
         
         <h4>3. Running BFS:</h4>
         <ol>
@@ -335,7 +365,7 @@
 </div>
 
 <script>
-// ===================== NETWORK SETUP ==========================
+// ===================== NETWORK SETUP (UPDATED for non-overlapping edges) ==========================
 const { jsPDF } = window.jspdf; 
 
 const nodes = new vis.DataSet([]);
@@ -366,11 +396,17 @@ const options = {
         }
     },
     edges: {
-        // Straight Edges
+        // --- MODIFIED CONFIGURATION FOR NON-OVERLAPPING BIDIRECTIONAL EDGES ---
+        arrows: {
+            to: { enabled: true, scaleFactor: 1, type: "arrow" },
+        },
         smooth: { 
-            enabled: false, 
-            type: 'continuous' 
+            enabled: true, 
+            type: 'curvedCW', // Forces a consistent curve type
+            roundness: 0.15 // Ensures separation for bidirectional edges (A->B and B->A)
         }, 
+        color: { color: '#848484', highlight: '#848484' },
+        // --- END OF MODIFIED CONFIGURATION ---
         font: { 
             align: "top",
             size: 14,
@@ -382,9 +418,13 @@ const options = {
 const network = new vis.Network(container, data, options);
 let edgeMode = false;
 let edgeStart = null;
+let edgeEnd = null; 
 let nodeCanvasPosition = null; 
 let edgeToEditId = null; 
 const actionStack = [];
+// --- NEW: Redo Stack ---
+const redoStack = [];
+
 
 // ===================== MODAL FUNCTIONS & DOWNLOAD =====================
 
@@ -501,49 +541,83 @@ nodeNameInput.addEventListener("keypress", function(event) {
         confirmNodeCreation();
     }
 });
-// ===================== WEIGHT DIALOG HANDLING ====================
+
+// ===================== WEIGHT DIALOG HANDLING (UPDATED to support new edge creation) ====================
 const weightDialog = document.getElementById("weightDialog");
 const weightInput = document.getElementById("weightInput");
 const weightDialogTitle = document.getElementById("weightDialogTitle");
 
-function showWeightDialog(edge) {
-    edgeToEditId = edge.id;
+/**
+ * Shows the weight dialog, either for editing an existing edge or creating a new one.
+ * @param {object | null} edge - The edge object to edit, or null if creating a new edge.
+ * @param {string | null} fromNode - The ID of the starting node if creating a new edge.
+ * @param {string | null} toNode - The ID of the ending node if creating a new edge.
+ */
+function showWeightDialog(edge = null, fromNode = null, toNode = null) {
+    // Reset state
+    edgeToEditId = null;
     
-    weightDialogTitle.innerText = `Edit Edge (${edge.from} ↔ ${edge.to})`;
-    weightInput.value = edge.weight !== undefined ? edge.weight : 0;
+    // Determine if editing or creating
+    if (edge) {
+        // Editing existing edge
+        edgeToEditId = edge.id;
+        weightDialogTitle.innerText = `Edit Edge Weight (${edge.from} → ${edge.to})`;
+        weightInput.value = edge.weight !== undefined ? edge.weight : 1;
+    } else if (fromNode && toNode) {
+        // Setting up for new edge creation
+        edgeToEditId = null; 
+        edgeStart = fromNode; // Use edgeStart/edgeEnd to temporarily hold new edge nodes
+        edgeEnd = toNode;
+        
+        weightDialogTitle.innerText = `Set Weight for New Edge (${fromNode} → ${toNode})`;
+        weightInput.value = 1; // Default to 1 for new edge
+    } else {
+        return; // Should not happen
+    }
     
     weightDialog.style.display = "block";
     weightInput.focus();
 }
+
 function hideWeightDialog() {
     weightDialog.style.display = "none";
-    edgeToEditId = null;
-}
-function confirmWeightEdit() {
-    const newWeight = parseInt(weightInput.value, );
-    
-    if (edgeToEditId === null) {
-        hideWeightDialog();
-        return;
+    // If an edge was being created, reset the nodes and colors
+    if (edgeStart && edgeToEditId === null) {
+        nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
     }
+    edgeToEditId = null;
+    edgeStart = null;
+    edgeEnd = null;
+}
+
+function confirmWeightEdit() {
+    const newWeight = parseInt(weightInput.value, 10);
     
     if (isNaN(newWeight) || newWeight < 0) {
         alert("Invalid input. Weight must be a non-negative integer.");
         return;
     }
     
-    const currentEdge = edges.get(edgeToEditId);
-    
-    // Edge weight is updated here manually
-    edges.update({
-        id: edgeToEditId,
-        from: currentEdge.from,
-        to: currentEdge.to,
-        label: "w=" + newWeight,
-        weight: newWeight,
-        title: "Weight: " + newWeight,
-        manualWeight: true
-    });
+    if (edgeToEditId) {
+        // --- Editing Existing Edge ---
+        const currentEdge = edges.get(edgeToEditId);
+        
+        edges.update({
+            id: edgeToEditId,
+            from: currentEdge.from,
+            to: currentEdge.to,
+            label: "w=" + newWeight,
+            weight: newWeight,
+            title: "Weight: " + newWeight,
+            manualWeight: true 
+        });
+    } else if (edgeStart && edgeEnd) {
+        // --- Creating New Edge ---
+        createEdge(edgeStart, edgeEnd, newWeight);
+        
+        // Reset the starting node color after creation
+        nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
+    }
     
     hideWeightDialog();
 }
@@ -553,6 +627,7 @@ weightInput.addEventListener("keypress", function(event) {
         event.preventDefault(); 
     }
 });
+
 // ===================== EDGE WEIGHT EDITING (Right-Click Override) ====================
 network.on("oncontextmenu", function(params) {
     // Prevent default browser menu
@@ -565,56 +640,71 @@ network.on("oncontextmenu", function(params) {
         showWeightDialog(currentEdge);
     }
 });
-// ===================== NODE CREATION / EDGE LOGIC ===========================
+
+// ===================== NODE CREATION / EDGE LOGIC (UPDATED mode label) ===========================
 function toggleEdgeMode() {
     edgeMode = !edgeMode;
+    // Reset edge creation state
+    if (edgeStart) {
+        nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
+    }
     edgeStart = null;
+    edgeEnd = null; // Resetting end node
+    
     document.getElementById("modeLabel").innerText =
-        edgeMode ? "Mode: Add Edge" : "Mode: Node Creation";
+        edgeMode ? "Mode: Add Directed Edge" : "Mode: Node Creation";
 }
+
 network.on("click", function(params) {
     const clickedNodes = params.nodes;
     const clickedEdges = params.edges;
     
-    // --- Left-Click on edge label check ---
+    // --- Left-Click on edge label check (for editing) ---
     if (clickedEdges && clickedEdges.length === 1) {
         const edgeId = clickedEdges[0];
         const currentEdge = edges.get(edgeId);
         
+        // Calculate midpoint (where the label is)
         const canvasPos = params.pointer.canvas;
         const edgePositions = network.getPositions([currentEdge.from, currentEdge.to]);
         const fromPos = edgePositions[currentEdge.from];
         const toPos = edgePositions[currentEdge.to];
-        
-        // Calculate midpoint (where the label is)
         const midX = (fromPos.x + toPos.x) / 2;
         const midY = (fromPos.y + toPos.y) / 2;
-        
-        // Check if click is within 30 pixels of the label's midpoint
         const distance = Math.sqrt(Math.pow(canvasPos.x - midX, 2) + Math.pow(canvasPos.y - midY, 2));
         
         if (distance < 30) {
             showWeightDialog(currentEdge);
             return; // Dialog opened, stop further processing
         }
-        // If an edge was clicked but not near the label, proceed to edge creation logic (if in edge mode)
     }
     
-    // Original Node/Edge Creation Logic Below:
+    // --- Node/Edge Creation Logic Below: ---
     
     if (edgeMode) {
-        // --- EDGE MODE LOGIC ---
         if (!clickedNodes || clickedNodes.length !== 1) {
             return; 
         }
         const nodeId = clickedNodes[0];
+        
         if (!edgeStart) {
             edgeStart = nodeId;
-            nodes.update({ id: nodeId, color: "#FFD700" }); 
+            nodes.update({ id: nodeId, color: "#FFD700" }); // Highlight start node
         } else if (edgeStart !== nodeId) {
-            createEdge(edgeStart, nodeId);
-            nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
-            edgeStart = null;
+            edgeEnd = nodeId;
+            
+            const edgeId = `${edgeStart}->${edgeEnd}`; 
+            if (edges.get(edgeId)) {
+                alert(`Edge already exists from ${edgeStart} to ${edgeEnd}!`);
+                // Reset state
+                nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
+                edgeStart = null;
+                edgeEnd = null;
+                return;
+            }
+            
+            // Open dialog to set weight for new edge (A -> B)
+            showWeightDialog(null, edgeStart, edgeEnd); 
         }
     } else {
         // --- NODE CREATION MODE LOGIC (Left-Click on empty space) ---
@@ -625,6 +715,8 @@ network.on("click", function(params) {
         showNodeDialog(canvasPoint.x, params.pointer.canvas.y);
     }
 });
+
+// --- UPDATED: Add Node clears redo stack ---
 function addNode(label, x, y, fixed=true) {
     if (nodes.get(label)) {
         alert("A node with this name already exists!");
@@ -639,55 +731,45 @@ function addNode(label, x, y, fixed=true) {
     };
     nodes.add(nodeData);
     actionStack.push({ type: "addNode", node: nodeData });
+    redoStack.length = 0; // Clear redo stack on new action
 }
 
-// createEdge calculates weight based on distance if none is provided
+// --- UPDATED: Create Edge now ONLY takes explicit weight ---
 function createEdge(n1, n2, weight) {
-    const edgeId1 = `${n1}-${n2}`;
-    const edgeId2 = `${n2}-${n1}`;
+    // Directed edge ID: n1 -> n2
+    const edgeId = `${n1}->${n2}`; 
 
-    const existingEdges = edges.get({
-        filter: function (item) {
-            return (item.from === n1 && item.to === n2) || (item.from === n2 && item.to === n1);
-        }
-    });
+    // Check only for existing edge in the EXACT direction n1 -> n2
+    const existingEdge = edges.get(edgeId);
 
-    if (existingEdges.length > 0) {
-        if (arguments.length > 2) return; 
-        alert("Edge already exists between these nodes!");
-        return;
+    if (existingEdge) {
+        return; 
     }
 
-    let calculatedWeight;
-    let title;
-    
-    if (weight !== undefined) {
-        calculatedWeight = weight;
-        title = `Weight: ${weight}`;
-    } else {
-        // Manual or Random Graph: Calculate weight based on distance
-        const p1 = network.getPositions([n1])[n1];
-        const p2 = network.getPositions([n2])[n2];
-        const dx = p1.x - p2.x;
-        const dy = p1.y - p2.y;
-        calculatedWeight = Math.round(Math.sqrt(dx * dx + dy * dy));
-        title = "Weight: " + calculatedWeight;
-    }
+    // Ensure weight is passed and valid (it should be from the dialog or random generator)
+    const calculatedWeight = (weight !== undefined && !isNaN(weight) && weight >= 0) ? weight : 1; 
 
     const edge = {
-        id: edgeId1,
+        id: edgeId, // Directed ID
         from: n1,
         to: n2,
         label: "w=" + calculatedWeight,
-        weight: calculatedWeight,
-        title: title,
-        manualWeight: weight === undefined      
+        weight: calculatedWeight, // Stored weight
+        title: `Weight: ${calculatedWeight}`,
+        manualWeight: true, 
+        // Set smooth parameters to ensure curved edge if a reverse edge exists
+        smooth: {
+            enabled: true,
+            type: 'curvedCW', // Use 'curvedCW' for consistent curving
+            roundness: 0.15 // Ensure separation
+        }
     };
     edges.add(edge);
     actionStack.push({ type: "addEdge", edge });
+    redoStack.length = 0; // Clear redo stack on new action
 }
 
-// ===================== RANDOM GRAPH GENERATOR ============================
+// ===================== RANDOM GRAPH GENERATOR (UPDATED for Redo Stack and explicit weights) ============================
 
 function createRandomGraph() {
     const numNodes = parseInt(document.getElementById("numNodes").value);
@@ -698,7 +780,8 @@ function createRandomGraph() {
         alert("Please enter a valid number of nodes (min 2).");
         return;
     }
-    const maxEdges = (numNodes * (numNodes - 1)) / 2;
+    // Max directed edges is N * (N - 1)
+    const maxEdges = numNodes * (numNodes - 1); 
     if (isNaN(numEdges) || numEdges < 0 || numEdges > maxEdges) {
         alert(`Please enter a valid number of edges (0 to ${maxEdges} for ${numNodes} nodes).`);
         return;
@@ -708,6 +791,7 @@ function createRandomGraph() {
     nodes.clear();
     edges.clear();
     actionStack.length = 0; // Clear undo history
+    redoStack.length = 0; // Clear redo history
     document.getElementById("resultTable").innerHTML = "";
 
     // 3. Define canvas bounds based on the element size
@@ -740,8 +824,8 @@ function createRandomGraph() {
     }
     nodes.add(newNodes);
 
-    // 5. Create Random Edges
-    const generatedEdges = new Set();
+    // 5. Create Random Edges (Now directed)
+    const generatedEdgeIds = new Set();
     let edgesCreated = 0;
     
     while (edgesCreated < numEdges) {
@@ -750,13 +834,14 @@ function createRandomGraph() {
 
         if (n1 === n2) continue;
         
-        const sorted = [n1, n2].sort();
-        const edgeKey = `${sorted[0]}-${sorted[1]}`;
+        // Directed edge ID
+        const edgeId = `${n1}->${n2}`; 
 
-        if (!generatedEdges.has(edgeKey)) {
-            // Do not pass a weight, letting createEdge calculate distance
-            createEdge(n1, n2); 
-            generatedEdges.add(edgeKey);
+        if (!generatedEdgeIds.has(edgeId)) {
+            // Generate a random weight between 1 and 20
+            const randomWeight = Math.floor(Math.random() * 20) + 1; 
+            createEdge(n1, n2, randomWeight); // Pass the weight explicitly
+            generatedEdgeIds.add(edgeId);
             edgesCreated++;
         }
     }
@@ -767,7 +852,7 @@ function createRandomGraph() {
     }); 
 }
 
-// ===================== UNDO ============================
+// ===================== UNDO/REDO LOGIC (NEW/UPDATED) ============================
 
 function undo() {
     if (actionStack.length === 0) {
@@ -776,6 +861,7 @@ function undo() {
     }
 
     const last = actionStack.pop();
+    redoStack.push(last); // Move action to redo stack
 
     if (last.type === "addNode") {
         nodes.remove(last.node.id);
@@ -788,7 +874,29 @@ function undo() {
     }
 }
 
-// ===================== RESET FUNCTIONALITY =====================
+function redo() {
+    if (redoStack.length === 0) {
+        alert("Nothing to redo!");
+        return;
+    }
+
+    const next = redoStack.pop();
+    actionStack.push(next); // Move action back to action stack
+
+    if (next.type === "addNode") {
+        // Re-add the node using the stored data (including position)
+        nodes.add(next.node); 
+        return;
+    }
+
+    if (next.type === "addEdge") {
+        // Re-add the edge using the stored data
+        edges.add(next.edge);
+        return;
+    }
+}
+
+// ===================== RESET FUNCTIONALITY (UPDATED) =====================
 
 /**
  * Resets the entire graph visualizer: nodes, edges, undo history, and results table.
@@ -800,6 +908,7 @@ function resetGraph() {
     
     // Clear undo history
     actionStack.length = 0;
+    redoStack.length = 0; // Clear redo history
     
     // Clear results table and start node input
     document.getElementById("resultTable").innerHTML = "";
@@ -809,22 +918,24 @@ function resetGraph() {
     document.getElementById("numNodes").value = "";
     document.getElementById("numEdges").value = "";
     
-    // Reset mode label
+    // Reset mode label and edge state
     document.getElementById("modeLabel").innerText = "Mode: Node Creation";
     edgeMode = false;
     edgeStart = null;
+    edgeEnd = null;
 }
 
-// ===================== BFS UTILITIES ===========================
+// ===================== BFS UTILITIES (Updated for Directed Graph) ===========================
 
 function getAdj() {
     const adj = {};
     nodes.get().forEach(n => adj[n.id] = []);
 
     edges.get().forEach(e => {
-        // BFS treats all edges as weight 1 (1 hop).
+        // BFS treats all edges as weight 1 (1 hop), regardless of the stored 'e.weight'.
+        // This is a directed graph adjacency list now.
         adj[e.from].push({ node: e.to, weight: 1 });
-        adj[e.to].push({ node: e.from, weight: 1 });
+        // NOTE: No reverse edge added here, as the graph is now explicitly directed.
     });
 
     return adj;
@@ -832,7 +943,8 @@ function getAdj() {
 
 async function highlightStep(id) {
     nodes.update({ id, color: "#FFD700" });
-    await new Promise(r => setTimeout(r, 500));
+    // Increase timeout slightly for better visualization of steps
+    await new Promise(r => setTimeout(r, 750)); 
     nodes.update({ id, color: "#FFA4A4" });
 }
 
@@ -844,7 +956,7 @@ async function runBFS() {
     });
     
     const start = document.getElementById("startNode").value.trim();
-    const adj = getAdj();
+    const adj = getAdj(); // Uses the new directed adjacency list
 
     if (!adj[start]) {
         alert("Invalid start node!");
