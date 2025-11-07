@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>BFS Visualizer</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #FCF9EA;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        #mynetwork {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #aaa;
+            border-radius: 15px;
+            background: #BADFDB;
+            cursor: crosshair;
+        }
+        button {
+            padding: 7px 12px;
+            border-radius: 6px;
+            border: none;
+            background: #FFA4A4;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+        }
+        #resultBox {
+            margin-top: 20px;
+            background: #BADFDB;
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #FFA4A4;
+            padding: 8px;
+        }
+        th {
+            background: #FFA4A4;
+            color: white;
+        }
+        #startNode, .input-small {
+            padding: 7px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            width: 100px; 
+            text-align: center;
+        }
+        /* --- Custom Dialog Styles --- */
+        #nodeDialog, #weightDialog, .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: #FCF9EA;
+            border: 2px solid #FFA4A4;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: none; 
+            text-align: left;
+            min-width: 250px;
+            max-width: 90vw; 
+            max-height: 80vh; 
+            overflow-y: auto;
+        }
+        .modal h3 {
+            color: #FFA4A4;
+            text-align: center;
+            border-bottom: 2px solid #FFA4A4;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .modal .modal-content {
+            margin-bottom: 15px;
+        }
+        .modal button.close {
+            display: block;
+            margin: 15px auto 0;
+            background: #BADFDB;
+            color: #111;
+            font-weight: bold;
+        }
+        #topRightButtons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+        }
+        /* --- Dialog specific styles --- */
+        #nodeDialog h4, #weightDialog h4 {
+            margin-top: 0;
+            color: #FFA4A4;
+            text-align: center;
+        }
+        #nodeDialog label, #weightDialog label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        #nodeNameInput, #weightInput {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            box-sizing: border-box; 
+        }
+        #dialogButtons {
+            text-align: right;
+            margin-top: 10px;
+        }
+        #dialogButtons button.confirm {
+             background: #FFA4A4;
+             color: white;
+        }
+        
+        #dialogButtons button.cancel {
+             background: #BADFDB;
+             color: #111;
+        }
+
+        /* --- Developed By Modal Layout --- */
+        .dev-team-row {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; 
+        }
+        .dev-profile-card {
+            flex: 1 1 42%; 
+            min-width: 250px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center; /* Center content horizontally */
+        }
+        .dev-profile-center {
+            max-width: 300px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .dev-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        .profile-details {
+            /* Flexbox for inline content within card, or block elements inside */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .inline-detail {
+            /* Style for the container holding Reg No and Email on the same line */
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 5px 0;
+            font-size: 14px; /* Optional: smaller font for inline details */
+        }
+
+        /* --- NEW: Video container styles for responsiveness --- */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: #000;
+            margin: 10px auto;
+            border-radius: 5px;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="topRightButtons">
+    <button onclick="openModal('infoModal')">Learn</button>
+    <button onclick="openModal('devModal')">Developed by</button>
+    <button onclick="openModal('helpModal')">Help</button>
+    <button onclick="downloadGraphData()">Download</button>
+</div>
+
+<h2>BFS Visualizer</h2>
+
+<div>
+    <label for="numNodes">Nodes:</label>
+    <input type="number" id="numNodes" class="input-small" value="" min="2">
+    <label for="numEdges">Edges:</label>
+    <input type="number" id="numEdges" class="input-small" value="" min="1">
+    <button onclick="createRandomGraph()">Generate Random Graph</button>
+</div>
+
+<button onclick="toggleEdgeMode()">Node/Edge</button>
+<button onclick="undo()">Undo</button>
+<button onclick="redo()">Redo</button> 
+<button onclick="resetGraph()">Reset All</button>
+<span id="modeLabel" style="margin-left:10px; font-weight:bold; color:#FFA4A4">
+    Mode: Node Creation
+</span>
+<br><br>
+<input type="text" id="startNode" placeholder="Enter start node">
+<button onclick="runBFS()">Run BFS</button>
+<div id="mynetwork"></div>
+
+<div id="nodeDialog">
+    <h4>Enter Node Name</h4>
+    <label for="nodeNameInput">Node Name:</label>
+    <input type="text" id="nodeNameInput" autocomplete="off" />
+    <div id="dialogButtons">
+        <button class="cancel" onclick="hideNodeDialog()">Cancel</button>
+        <button class="confirm" onclick="confirmNodeCreation()">Create Node</button>
+    </div>
+</div>
+
+<div id="weightDialog">
+    <h4 id="weightDialogTitle">Edit Edge Weight</h4>
+    <label for="weightInput">Weight:</label>
+    <input type="number" id="weightInput" min="0" autocomplete="off" />
+    <div id="dialogButtons">
+        <button class="cancel" onclick="hideWeightDialog()">Cancel</button>
+        <button class="confirm" onclick="confirmWeightEdit()">Save Weight</button>
+    </div>
+</div>
+
+<div id="resultBox">
+    <h3>Algorithm Results</h3>
+    <div id="resultTable"></div>
+</div>
+
+<div id="infoModal" class="modal">
+    <h3>🧠 Learn BFS & Application</h3>
+    <div class="modal-content">
+        <h4>What is BFS?</h4>
+        <p>Breadth-First Search (BFS) is a fundamental graph traversal algorithm used to explore nodes level by level. Starting from a chosen source node, BFS visits all its immediate neighbors first, then moves to the neighbors of those neighbors, continuing outward like a wave. Because of this layered exploration, BFS is ideal for finding the shortest path in an unweighted graph, where every edge is treated as having equal cost.</p>
+        <p>BFS uses a queue to store nodes in the order they must be visited. It begins by marking the start node as visited, pushing it into the queue, and then repeatedly removing a node from the front of the queue and visiting all its unvisited neighbors. This ensures a systematic left-to-right and top-to-bottom exploration.</p>
+        <p><b>Time Complexity</b>: O(V + E) where V = number of vertices, E = number of edges.</p>
+        <p><b>Space Complexity</b>: O(V) for visited arrays, parent tracking, and queue storage.</p>
+        <h4>Algorithm Steps</h4>
+        <ul>
+            <li>Initialize an empty queue.</li>
+            <li>Mark the start node as visited and enqueue it.</li>
+            <li>While the queue is not empty:</li>
+            <li>Dequeue a node.</li>
+            <li>Visit all unvisited neighbors and enqueue them.</li>
+        </ul>
+        <h4>Application of BFS:</h4>
+        <ul>
+            <li>Shortest Path: BFS finds the shortest path between two nodes in an unweighted graph (treating all edges as weight 1). This application is used here!</li>
+            <li>Network Broadcasting: Finding all nodes reachable from a source node (e.g., social media reach).</li>
+            <li>Web Crawlers: Exploring pages layer by layer.</li>
+        </ul>
+
+        <h4>How to Understand the Result:</h4>
+        <p>The table displays the results relative to your chosen Start Node:</p>
+        <ul>
+            <li>Distance: The minimum number of edges (hops) required to travel from the start node to the destination node. '∞' means the node is unreachable.</li>
+            <li>Shortest Path: The sequence of nodes taken to achieve that shortest distance.</li>
+        </ul>
+
+        <hr>
+        
+        <h4>📺 Video Demonstration</h4>
+        <div class="video-container">
+            <iframe 
+                src="Breadth First Search (BFS)_ Visualized and Explained.mp4" 
+                title="BFS Algorithm Explanation" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+    </div>
+    <button class="close" onclick="closeModal('infoModal')">Close</button>
+</div>
+
+<div id="devModal" class="modal">
+    <h3>👨‍💻 Developed By</h3>
+    <div class="modal-content">
+        
+        
+        <div class="dev-team-row">
+            <div class="dev-profile-card">
+                <img src="charan .jpg" alt="P.A.Krishna Charan" class="dev-photo">
+                <h4 style="color:#FFA4A4; margin-top: 5px;">P. A. Krishna Charan (Student)</h4>
+                <div class="inline-detail">
+                    <span>Reg No: 24BCE5247</span>
+                    
+                </div>
+            </div>
+
+            <div class="dev-profile-card">
+                <img src="annie.jpg" alt="V. Angeline" class="dev-photo">
+                <h4 style="color:#FFA4A4; margin-top: 5px;">V. Angeline (Student)</h4>
+                <div class="inline-detail">
+                    <span>Reg No: 24BCE5383</span>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="dev-profile-center">
+            <img src="faculty.jpg" alt="Prof. A.Swaminathan" class="dev-photo">
+            <h4 style="color:#FFA4A4; margin-top: 5px;">Prof. A. Swaminathan (Faculty Mentor)</h4>
+            
+            
+        </div>
+    </div>
+    <button class="close" onclick="closeModal('devModal')">Close</button>
+</div>
+
+<div id="helpModal" class="modal">
+    <h3>❓ How to Use This Project</h3>
+    <div class="modal-content">
+        <h4>1. Creating a Graph:</h4>
+        <p>You have two options:</p>
+        <ul>
+            <li>Generate Random Graph: Enter the desired Nodes and Edges and click Generate Random Graph.</li>
+            <li>Manual Creation:
+                <ul>
+                    <li>Create Node: Click any empty space in the blue canvas. A dialog will pop up to name the node.</li>
+                    <li>Create Edge: Click the Node/Edge button to switch to **"Mode: Add Directed Edge"**. Click the starting node (it turns yellow), then click the ending node. Repeat this in reverse (B, then A) to create a curved, bidirectional edge.</li>
+                </ul>
+            </li>
+        </ul>
+        <h4>2. Editing/Viewing Weights:</h4>
+        <p>To change the weight of a **directed** edge, Left-Click directly on the weight value (e.g., w=10) displayed on the edge.</p>
+        
+        <h4>3. Running BFS:</h4>
+        <ol>
+            <li>Enter the name of your desired starting node (e.g., Node 1 or A) into the Enter start node input box.</li>
+            <li>Click Run BFS. The nodes will highlight sequentially, and the results table will populate.</li>
+        </ol>
+        <h4>4. Resetting:</h4>
+        <p>Use Undo for the last action, or Reset All to clear the entire canvas and results.</p>
+    </div>
+    <button class="close" onclick="closeModal('helpModal')">Close</button>
+</div>
+
+<script>
+// ===================== NETWORK SETUP (UPDATED for Directed Curved Edges) ==========================
+const { jsPDF } = window.jspdf; 
+
+const nodes = new vis.DataSet([]);
+const edges = new vis.DataSet([]);
+const container = document.getElementById("mynetwork");
+const data = { nodes, edges };
+const options = {
+    // Physics disabled for no animation
+    physics: { enabled: false },
+    // Manual zoom and pan permanently disabled
+    interaction: { 
+        zoomView: false, 
+        dragView: false, 
+        dragNodes: true 
+    },
+    nodes: {
+        shape: "circle",
+        size: 18,
+        color: "#FFA4A4",
+        font: { color: "#111" },
+        // Fix node size regardless of view
+        scaling: {
+            min: 18,
+            max: 18, 
+            label: {
+                drawThreshold: 0 
+            }
+        }
+    },
+    edges: {
+        // --- NEW CONFIGURATION FOR DIRECTED, CURVED EDGES ---
+        arrows: {
+            to: { enabled: true, scaleFactor: 1, type: "arrow" },
+        },
+        smooth: { 
+            enabled: true, 
+            type: 'dynamic' // Use dynamic for curved bidirectional edges
+        }, 
+        color: { color: '#848484', highlight: '#848484' },
+        // --- END OF NEW CONFIGURATION ---
+        font: { 
+            align: "top",
+            size: 14,
+            background: "none", 
+            strokeWidth: 0      
+        }
+    }
+};
+const network = new vis.Network(container, data, options);
+let edgeMode = false;
+let edgeStart = null;
+let nodeCanvasPosition = null; 
+let edgeToEditId = null; 
+const actionStack = [];
+// --- NEW: Redo Stack ---
+const redoStack = [];
+
+
+// ===================== MODAL FUNCTIONS & DOWNLOAD =====================
+
+function openModal(id) {
+    document.getElementById(id).style.display = 'block';
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+async function downloadGraphData() {
+    const networkElement = document.getElementById('mynetwork');
+    const resultTableElement = document.querySelector('#resultTable table');
+    const doc = new jsPDF('p', 'mm', 'a4');
+    let y_position = 20;
+
+    // --- 1. Capture and Add Graph Image ---
+    try {
+        const canvas = await html2canvas(networkElement, {
+            scale: 2, // Improve image quality
+            logging: false,
+            backgroundColor: '#BADFDB' // Match background color for clean capture
+        });
+        const imgData = canvas.toDataURL('image/png');
+        
+        const imgWidth = 180; // A4 width is ~210, so 180 is good
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        doc.setFontSize(12);
+        doc.text("BFS Visualizer Results", 105, 10, null, null, "center");
+        
+        doc.text("I. Graph Structure (Image)", 20, y_position);
+        y_position += 5;
+        
+        doc.addImage(imgData, 'PNG', 15, y_position, imgWidth, imgHeight);
+        y_position += imgHeight + 10;
+        
+    } catch (error) {
+        console.error("Error capturing graph canvas:", error);
+        doc.text("Error capturing graph visualization.", 20, y_position);
+        y_position += 10;
+    }
+
+    // --- 2. Add Results Table (if exists) ---
+    if (resultTableElement) {
+        
+        // --- FIX: Clone and clean the table content before PDF generation ---
+        const cleanTable = resultTableElement.cloneNode(true);
+        const rows = cleanTable.querySelectorAll('tr');
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            cells.forEach(cell => {
+                // Replace '→' with ' To '
+                cell.textContent = cell.textContent.replace(/ → /g, ' To ');
+                // Replace '-' with 'None'
+                if (cell.textContent.trim() === '-') {
+                    cell.textContent = 'None';
+                }
+            });
+        });
+
+        doc.addPage();
+        y_position = 20;
+        doc.text("II. BFS Results (Table)", 20, y_position);
+        y_position += 5;
+
+        // Pass the cleaned table element to autoTable
+        doc.autoTable({
+            html: cleanTable, // Use the cleaned clone
+            startY: y_position,
+            theme: 'striped',
+            headStyles: { fillColor: [255, 164, 164] },
+            styles: { fontSize: 10 },
+            margin: { left: 15, right: 15 }
+        });
+    } else {
+        doc.text("No BFS result table found.", 20, y_position + 10);
+    }
+
+    doc.save('BFS_Visualization_Results.pdf');
+}
+
+
+// ===================== NODE DIALOG HANDLING ====================
+const nodeDialog = document.getElementById("nodeDialog");
+const nodeNameInput = document.getElementById("nodeNameInput");
+
+function showNodeDialog(x, y) {
+    nodeCanvasPosition = { x, y };
+    nodeNameInput.value = "";
+    nodeDialog.style.display = "block";
+    nodeNameInput.focus();
+}
+function hideNodeDialog() {
+    nodeDialog.style.display = "none";
+    nodeCanvasPosition = null;
+}
+function confirmNodeCreation() {
+    const label = nodeNameInput.value.trim();
+    
+    // Use the raw canvas coordinates directly for placement
+    const x = nodeCanvasPosition ? nodeCanvasPosition.x : 0;
+    const y = nodeCanvasPosition ? nodeCanvasPosition.y : 0;
+    
+    hideNodeDialog();
+    
+    if (label) {
+        addNode(label, x, y, true); 
+    }
+}
+nodeNameInput.addEventListener("keypress", function(event) {
+    if (event.key === "Enter" && nodeDialog.style.display === "block") {
+        confirmNodeCreation();
+    }
+});
+// ===================== WEIGHT DIALOG HANDLING (UPDATED TITLE) ====================
+const weightDialog = document.getElementById("weightDialog");
+const weightInput = document.getElementById("weightInput");
+const weightDialogTitle = document.getElementById("weightDialogTitle");
+
+function showWeightDialog(edge) {
+    edgeToEditId = edge.id;
+    
+    // Title updated to show directed edge: A → B
+    weightDialogTitle.innerText = `Edit Edge Weight (${edge.from} → ${edge.to})`;
+    weightInput.value = edge.weight !== undefined ? edge.weight : 0;
+    
+    weightDialog.style.display = "block";
+    weightInput.focus();
+}
+function hideWeightDialog() {
+    weightDialog.style.display = "none";
+    edgeToEditId = null;
+}
+function confirmWeightEdit() {
+    const newWeight = parseInt(weightInput.value, );
+    
+    if (edgeToEditId === null) {
+        hideWeightDialog();
+        return;
+    }
+    
+    if (isNaN(newWeight) || newWeight < 0) {
+        alert("Invalid input. Weight must be a non-negative integer.");
+        return;
+    }
+    
+    const currentEdge = edges.get(edgeToEditId);
+    
+    // Edge weight is updated here manually
+    edges.update({
+        id: edgeToEditId,
+        from: currentEdge.from,
+        to: currentEdge.to,
+        label: "w=" + newWeight,
+        weight: newWeight,
+        title: "Weight: " + newWeight,
+        manualWeight: true
+    });
+    
+    hideWeightDialog();
+}
+weightInput.addEventListener("keypress", function(event) {
+    if (event.key === "Enter" && weightDialog.style.display === "block") {
+        confirmWeightEdit();
+        event.preventDefault(); 
+    }
+});
+// ===================== EDGE WEIGHT EDITING (Right-Click Override) ====================
+network.on("oncontextmenu", function(params) {
+    // Prevent default browser menu
+    params.event.preventDefault(); 
+    
+    // Optional: If an edge is right-clicked, still open the dialog
+    if (params.edges.length === 1) {
+        const edgeId = params.edges[0];
+        const currentEdge = edges.get(edgeId);
+        showWeightDialog(currentEdge);
+    }
+});
+// ===================== NODE CREATION / EDGE LOGIC (UPDATED mode label) ===========================
+function toggleEdgeMode() {
+    edgeMode = !edgeMode;
+    edgeStart = null;
+    document.getElementById("modeLabel").innerText =
+        edgeMode ? "Mode: Add Directed Edge" : "Mode: Node Creation";
+}
+network.on("click", function(params) {
+    const clickedNodes = params.nodes;
+    const clickedEdges = params.edges;
+    
+    // --- Left-Click on edge label check ---
+    if (clickedEdges && clickedEdges.length === 1) {
+        const edgeId = clickedEdges[0];
+        const currentEdge = edges.get(edgeId);
+        
+        const canvasPos = params.pointer.canvas;
+        const edgePositions = network.getPositions([currentEdge.from, currentEdge.to]);
+        const fromPos = edgePositions[currentEdge.from];
+        const toPos = edgePositions[currentEdge.to];
+        
+        // Calculate midpoint (where the label is)
+        const midX = (fromPos.x + toPos.x) / 2;
+        const midY = (fromPos.y + toPos.y) / 2;
+        
+        // Check if click is within 30 pixels of the label's midpoint
+        const distance = Math.sqrt(Math.pow(canvasPos.x - midX, 2) + Math.pow(canvasPos.y - midY, 2));
+        
+        if (distance < 30) {
+            showWeightDialog(currentEdge);
+            return; // Dialog opened, stop further processing
+        }
+        // If an edge was clicked but not near the label, proceed to edge creation logic (if in edge mode)
+    }
+    
+    // Original Node/Edge Creation Logic Below:
+    
+    if (edgeMode) {
+        // --- EDGE MODE LOGIC (Now directed) ---
+        if (!clickedNodes || clickedNodes.length !== 1) {
+            return; 
+        }
+        const nodeId = clickedNodes[0];
+        if (!edgeStart) {
+            edgeStart = nodeId;
+            nodes.update({ id: nodeId, color: "#FFD700" }); 
+        } else if (edgeStart !== nodeId) {
+            createEdge(edgeStart, nodeId); // Creates A -> B
+            nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
+            edgeStart = null;
+        }
+    } else {
+        // --- NODE CREATION MODE LOGIC (Left-Click on empty space) ---
+        if (clickedNodes && clickedNodes.length > 0) {
+            return; 
+        }
+        const canvasPoint = params.pointer.canvas;
+        showNodeDialog(canvasPoint.x, params.pointer.canvas.y);
+    }
+});
+
+// --- UPDATED: Add Node clears redo stack ---
+function addNode(label, x, y, fixed=true) {
+    if (nodes.get(label)) {
+        alert("A node with this name already exists!");
+        return;
+    }
+    const nodeData = {
+        id: label,
+        label: label,
+        x, y,
+        color: "#FFA4A4",
+        fixed: { x: fixed, y: fixed }
+    };
+    nodes.add(nodeData);
+    actionStack.push({ type: "addNode", node: nodeData });
+    redoStack.length = 0; // Clear redo stack on new action
+}
+
+// --- UPDATED: Create Edge clears redo stack ---
+function createEdge(n1, n2, weight) {
+    // Directed edge ID: n1 -> n2
+    const edgeId = `${n1}->${n2}`; 
+
+    // Check only for existing edge in the EXACT direction n1 -> n2
+    const existingEdge = edges.get(edgeId);
+
+    if (existingEdge) {
+        if (arguments.length > 2) return; 
+        alert(`Edge already exists from ${n1} to ${n2}!`);
+        return;
+    }
+
+    let calculatedWeight;
+    let title;
+    
+    if (weight !== undefined) {
+        calculatedWeight = weight;
+        title = `Weight: ${weight}`;
+    } else {
+        // Calculate weight based on distance (for display/future use)
+        // Set a minimum default weight of 1
+        const p1 = network.getPositions([n1])[n1];
+        const p2 = network.getPositions([n2])[n2];
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        calculatedWeight = Math.round(Math.sqrt(dx * dx + dy * dy)) || 1;
+        title = "Weight: " + calculatedWeight;
+    }
+
+    const edge = {
+        id: edgeId, // Directed ID
+        from: n1,
+        to: n2,
+        label: "w=" + calculatedWeight,
+        weight: calculatedWeight, // Stored weight (for display/future algorithms)
+        title: title,
+        manualWeight: weight === undefined,
+        // Optional: set smooth parameters to ensure curved edge if a reverse edge exists
+        smooth: {
+            enabled: true,
+            type: 'dynamic'
+        }
+    };
+    edges.add(edge);
+    actionStack.push({ type: "addEdge", edge });
+    redoStack.length = 0; // Clear redo stack on new action
+}
+
+// ===================== RANDOM GRAPH GENERATOR (UPDATED for Redo Stack) ============================
+
+function createRandomGraph() {
+    const numNodes = parseInt(document.getElementById("numNodes").value);
+    const numEdges = parseInt(document.getElementById("numEdges").value);
+
+    // 1. Validate Input
+    if (isNaN(numNodes) || numNodes < 2) {
+        alert("Please enter a valid number of nodes (min 2).");
+        return;
+    }
+    // Max directed edges is N * (N - 1)
+    const maxEdges = numNodes * (numNodes - 1); 
+    if (isNaN(numEdges) || numEdges < 0 || numEdges > maxEdges) {
+        alert(`Please enter a valid number of edges (0 to ${maxEdges} for ${numNodes} nodes).`);
+        return;
+    }
+
+    // 2. Clear Existing Graph
+    nodes.clear();
+    edges.clear();
+    actionStack.length = 0; // Clear undo history
+    redoStack.length = 0; // Clear redo history
+    document.getElementById("resultTable").innerHTML = "";
+
+    // 3. Define canvas bounds based on the element size
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    const buffer = 50;
+    // Calculate network's internal coordinate boundaries
+    const minX = -width / 2 + buffer;
+    const maxX = width / 2 - buffer;
+    const minY = -height / 2 + buffer;
+    const maxY = height / 2 - buffer;
+
+    // 4. Create Nodes with scattered fixed positions
+    const nodeLabels = [];
+    const newNodes = [];
+
+    for (let i = 1; i <= numNodes; i++) {
+        const label = `Node ${i}`;
+        nodeLabels.push(label);
+        newNodes.push({ 
+            id: label, 
+            label: label, 
+            color: "#FFA4A4",
+            // Set random positions inside the calculated bounds
+            x: Math.random() * (maxX - minX) + minX,
+            y: Math.random() * (maxY - minY) + minY,
+            fixed: { x: true, y: true } // Fixed position, no physics needed
+        });
+    }
+    nodes.add(newNodes);
+
+    // 5. Create Random Edges (Now directed)
+    const generatedEdgeIds = new Set();
+    let edgesCreated = 0;
+    
+    while (edgesCreated < numEdges) {
+        let n1 = nodeLabels[Math.floor(Math.random() * numNodes)];
+        let n2 = nodeLabels[Math.floor(Math.random() * numNodes)];
+
+        if (n1 === n2) continue;
+        
+        // Directed edge ID
+        const edgeId = `${n1}->${n2}`; 
+
+        if (!generatedEdgeIds.has(edgeId)) {
+            // Do not pass a weight, letting createEdge calculate distance
+            createEdge(n1, n2); 
+            generatedEdgeIds.add(edgeId);
+            edgesCreated++;
+        }
+    }
+    
+    // 6. Fit to view once to ensure all scattered nodes are visible
+    network.fit({ 
+        padding: 10 
+    }); 
+}
+
+// ===================== UNDO/REDO LOGIC (NEW/UPDATED) ============================
+
+function undo() {
+    if (actionStack.length === 0) {
+        alert("Nothing to undo!");
+        return;
+    }
+
+    const last = actionStack.pop();
+    redoStack.push(last); // Move action to redo stack
+
+    if (last.type === "addNode") {
+        nodes.remove(last.node.id);
+        return;
+    }
+
+    if (last.type === "addEdge") {
+        edges.remove(last.edge.id);
+        return;
+    }
+}
+
+function redo() {
+    if (redoStack.length === 0) {
+        alert("Nothing to redo!");
+        return;
+    }
+
+    const next = redoStack.pop();
+    actionStack.push(next); // Move action back to action stack
+
+    if (next.type === "addNode") {
+        // Re-add the node using the stored data (including position)
+        nodes.add(next.node); 
+        return;
+    }
+
+    if (next.type === "addEdge") {
+        // Re-add the edge using the stored data
+        edges.add(next.edge);
+        return;
+    }
+}
+
+// ===================== RESET FUNCTIONALITY (UPDATED) =====================
+
+/**
+ * Resets the entire graph visualizer: nodes, edges, undo history, and results table.
+ */
+function resetGraph() {
+    // Clear graph data
+    nodes.clear();
+    edges.clear();
+    
+    // Clear undo history
+    actionStack.length = 0;
+    redoStack.length = 0; // Clear redo history
+    
+    // Clear results table and start node input
+    document.getElementById("resultTable").innerHTML = "";
+    document.getElementById("startNode").value = "";
+    
+    // FIX: Resetting the Node and Edge count inputs to defaults
+    document.getElementById("numNodes").value = "";
+    document.getElementById("numEdges").value = "";
+    
+    // Reset mode label
+    document.getElementById("modeLabel").innerText = "Mode: Node Creation";
+    edgeMode = false;
+    edgeStart = null;
+}
+
+// ===================== BFS UTILITIES (Updated for Directed Graph) ===========================
+
+function getAdj() {
+    const adj = {};
+    nodes.get().forEach(n => adj[n.id] = []);
+
+    edges.get().forEach(e => {
+        // BFS treats all edges as weight 1 (1 hop), regardless of the stored 'e.weight'.
+        // This is a directed graph adjacency list now.
+        adj[e.from].push({ node: e.to, weight: 1 });
+        // NOTE: No reverse edge added here, as the graph is now explicitly directed.
+    });
+
+    return adj;
+}
+
+async function highlightStep(id) {
+    nodes.update({ id, color: "#FFD700" });
+    // Increase timeout slightly for better visualization of steps
+    await new Promise(r => setTimeout(r, 750)); 
+    nodes.update({ id, color: "#FFA4A4" });
+}
+
+// ===================== BFS MAIN ================================
+
+async function runBFS() {
+    nodes.getIds().forEach(id => {
+        nodes.update({ id, color: "#FFA4A4" });
+    });
+    
+    const start = document.getElementById("startNode").value.trim();
+    const adj = getAdj(); // Uses the new directed adjacency list
+
+    if (!adj[start]) {
+        alert("Invalid start node!");
+        return;
+    }
+
+    const dist = {};
+    const parent = {};
+    const order = [];
+
+    Object.keys(adj).forEach(n => {
+        dist[n] = Infinity;
+        parent[n] = null;
+    });
+
+    dist[start] = 0;
+
+    const q = [start];
+
+    while (q.length) {
+        const node = q.shift();
+        order.push(node);
+
+        await highlightStep(node);
+        updateTable(order, dist, parent, start);
+
+        for (let nei of adj[node]) {
+            if (dist[nei.node] === Infinity) {
+                dist[nei.node] = dist[node] + 1; 
+                parent[nei.node] = node;
+                q.push(nei.node);
+            }
+        }
+    }
+}
+
+// ===================== PATH RECONSTRUCTION ======================
+
+function reconstructPath(parent, node, start) {
+    if (parent[node] === null && node !== start) return "-";
+    const path = [];
+    let currentNode = node;
+    while (currentNode !== null) {
+        path.push(currentNode);
+        currentNode = parent[currentNode];
+    }
+    return path.reverse().join(" → ");
+}
+
+// ===================== OUTPUT TABLE =============================
+
+function updateTable(order, dist, parent, start) {
+    let html = `<h4>BFS (No of Hops + Path)</h4>`;
+    html += `<p><b>Visited Order:</b> ${order.join(" → ")}</p>`;
+
+    html += `<table>
+                <tr>
+                    <th>Node</th>
+                    <th>No of Hops</th>
+                    <th>Shortest Path</th>
+                </tr>`;
+
+    Object.keys(dist).sort().forEach(n => {
+        const path = reconstructPath(parent, n, start);
+        html += `<tr>
+                    <td>${n}</td>
+                    <td>${dist[n] === Infinity ? "∞" : dist[n]}</td>
+                    <td>${path}</td>
+                </tr>`;
+    });
+
+    html += `</table>`;
+    document.getElementById("resultTable").innerHTML = html;
+}
+</script>
+</body>
+</html>
