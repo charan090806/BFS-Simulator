@@ -185,21 +185,19 @@
         /* --- NEW: Video container styles for responsiveness --- */
         .video-container {
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            padding-bottom: 56.25%; /* 16:9 */
             height: 0;
             overflow: hidden;
-            max-width: 100%;
-            background: #000;
-            margin: 10px auto;
-            border-radius: 5px;
+            background: black;
+            border-radius: 8px;
         }
-        .video-container iframe {
+        .video-container video {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: 0;
+            object-fit: contain; /* no cropping */
         }
     </style>
 </head>
@@ -292,12 +290,10 @@
         
         <h4>📺 Video Demonstration</h4>
         <div class="video-container">
-            <iframe 
-                src="video.mp4" 
-                title="BFS Algorithm Explanation" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowfullscreen>
-            </iframe>
+             <video controls>
+                <source src="video.mp4" type="video/mp4">
+                Your browser does not support video playback.
+            </video>
         </div>
 
     </div>
@@ -1035,4 +1031,3 @@ function updateTable(order, dist, parent, start) {
 </script>
 </body>
 </html>
-
