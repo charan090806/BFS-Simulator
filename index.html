@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,6 +33,9 @@
             color: white;
             cursor: pointer;
             margin: 5px;
+        }
+        button:hover {
+            background: #ff8888;
         }
         #resultBox {
             margin-top: 20px;
@@ -155,7 +157,7 @@
             border: 1px solid #ddd;
             padding: 15px;
             border-radius: 8px;
-            text-align: center; /* Center content horizontally */
+            text-align: center;
         }
         .dev-profile-center {
             max-width: 300px;
@@ -173,16 +175,15 @@
             margin-bottom: 10px;
         }
         .inline-detail {
-            /* Style for the container holding Reg No and Email on the same line */
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 10px;
             margin: 5px 0;
-            font-size: 14px; /* Optional: smaller font for inline details */
+            font-size: 14px;
         }
 
-        /* --- NEW: Video container styles for responsiveness --- */
+        /* --- Video container styles for responsiveness --- */
         .video-container {
             position: relative;
             padding-bottom: 56.25%; /* 16:9 */
@@ -197,7 +198,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain; /* no cropping */
+            object-fit: contain;
         }
     </style>
 </head>
@@ -343,7 +344,7 @@
             <li>Manual Creation:
                 <ul>
                     <li>Create Node: Click any empty space in the blue canvas. A dialog will pop up to name the node.</li>
-                    <li>Create Edge: Click the Node/Edge button to switch to Mode: Add Directed Edge. Click the starting node (it turns yellow), then click the ending node. A dialog will appear to set the weight for this directed edge (A rightarrow B). To make it bidirectional (A leftrightarrow B), you must repeat the process in reverse (B, then A) and set a potentially different weight.</li>
+                    <li>Create Edge: Click the Node/Edge button to switch to Mode: Add Directed Edge. Click the starting node (it turns yellow), then click the ending node. A dialog will appear to set the weight for this directed edge (A → B). To make it bidirectional (A ↔ B), you must repeat the process in reverse (B, then A) and set a potentially different weight.</li>
                 </ul>
             </li>
         </ul>
@@ -356,13 +357,13 @@
             <li>Click Run BFS. The nodes will highlight sequentially, and the results table will populate.</li>
         </ol>
         <h4>4. Resetting:</h4>
-        <p>Use Undo for the last action, or Reset All to clear the entire canvas and results.</p>
+        <p>Use Undo for the last action, Redo to restore undone actions, or Reset All to clear the entire canvas and results.</p>
     </div>
     <button class="close" onclick="closeModal('helpModal')">Close</button>
 </div>
 
 <script>
-// ===================== NETWORK SETUP (UPDATED for non-overlapping edges) ==========================
+// ===================== NETWORK SETUP ==========================
 const { jsPDF } = window.jspdf; 
 
 const nodes = new vis.DataSet([]);
@@ -370,9 +371,7 @@ const edges = new vis.DataSet([]);
 const container = document.getElementById("mynetwork");
 const data = { nodes, edges };
 const options = {
-    // Physics disabled for no animation
     physics: { enabled: false },
-    // Manual zoom and pan permanently disabled
     interaction: { 
         zoomView: false, 
         dragView: false, 
@@ -383,7 +382,6 @@ const options = {
         size: 18,
         color: "#FFA4A4",
         font: { color: "#111" },
-        // Fix node size regardless of view
         scaling: {
             min: 18,
             max: 18, 
@@ -393,17 +391,15 @@ const options = {
         }
     },
     edges: {
-        // --- MODIFIED CONFIGURATION FOR NON-OVERLAPPING BIDIRECTIONAL EDGES ---
         arrows: {
             to: { enabled: true, scaleFactor: 1, type: "arrow" },
         },
         smooth: { 
             enabled: true, 
-            type: 'curvedCW', // Forces a consistent curve type
-            roundness: 0.15 // Ensures separation for bidirectional edges (A->B and B->A)
+            type: 'curvedCW',
+            roundness: 0.15
         }, 
         color: { color: '#848484', highlight: '#848484' },
-        // --- END OF MODIFIED CONFIGURATION ---
         font: { 
             align: "top",
             size: 14,
@@ -419,7 +415,6 @@ let edgeEnd = null;
 let nodeCanvasPosition = null; 
 let edgeToEditId = null; 
 const actionStack = [];
-// --- NEW: Redo Stack ---
 const redoStack = [];
 
 
@@ -442,13 +437,13 @@ async function downloadGraphData() {
     // --- 1. Capture and Add Graph Image ---
     try {
         const canvas = await html2canvas(networkElement, {
-            scale: 2, // Improve image quality
+            scale: 2,
             logging: false,
-            backgroundColor: '#BADFDB' // Match background color for clean capture
+            backgroundColor: '#BADFDB'
         });
         const imgData = canvas.toDataURL('image/png');
         
-        const imgWidth = 180; // A4 width is ~210, so 180 is good
+        const imgWidth = 180;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
         doc.setFontSize(12);
@@ -468,19 +463,18 @@ async function downloadGraphData() {
 
     // --- 2. Add Results Table (if exists) ---
     if (resultTableElement) {
-        
-        // --- FIX: Clone and clean the table content before PDF generation ---
         const cleanTable = resultTableElement.cloneNode(true);
         const rows = cleanTable.querySelectorAll('tr');
         rows.forEach(row => {
-            const cells = row.querySelectorAll('td');
+            const cells = row.querySelectorAll('td, th');
             cells.forEach(cell => {
-                // Replace '→' with ' To '
-                cell.textContent = cell.textContent.replace(/ → /g, ' To ');
-                // Replace '-' with 'None'
-                if (cell.textContent.trim() === '-') {
-                    cell.textContent = 'None';
+                let text = cell.textContent;
+                text = text.replace(/→/g, ' To ');
+                text = text.replace(/∞/g, 'Infinity');
+                if (text.trim() === '-' || text.trim() === '') {
+                    text = 'None';
                 }
+                cell.textContent = text;
             });
         });
 
@@ -489,9 +483,8 @@ async function downloadGraphData() {
         doc.text("II. BFS Results (Table)", 20, y_position);
         y_position += 5;
 
-        // Pass the cleaned table element to autoTable
         doc.autoTable({
-            html: cleanTable, // Use the cleaned clone
+            html: cleanTable,
             startY: y_position,
             theme: 'striped',
             headStyles: { fillColor: [255, 164, 164] },
@@ -516,14 +509,15 @@ function showNodeDialog(x, y) {
     nodeDialog.style.display = "block";
     nodeNameInput.focus();
 }
+
 function hideNodeDialog() {
     nodeDialog.style.display = "none";
     nodeCanvasPosition = null;
 }
+
 function confirmNodeCreation() {
     const label = nodeNameInput.value.trim();
     
-    // Use the raw canvas coordinates directly for placement
     const x = nodeCanvasPosition ? nodeCanvasPosition.x : 0;
     const y = nodeCanvasPosition ? nodeCanvasPosition.y : 0;
     
@@ -533,43 +527,34 @@ function confirmNodeCreation() {
         addNode(label, x, y, true); 
     }
 }
+
 nodeNameInput.addEventListener("keypress", function(event) {
     if (event.key === "Enter" && nodeDialog.style.display === "block") {
         confirmNodeCreation();
     }
 });
 
-// ===================== WEIGHT DIALOG HANDLING (UPDATED to support new edge creation) ====================
+// ===================== WEIGHT DIALOG HANDLING ====================
 const weightDialog = document.getElementById("weightDialog");
 const weightInput = document.getElementById("weightInput");
 const weightDialogTitle = document.getElementById("weightDialogTitle");
 
-/**
- * Shows the weight dialog, either for editing an existing edge or creating a new one.
- * @param {object | null} edge - The edge object to edit, or null if creating a new edge.
- * @param {string | null} fromNode - The ID of the starting node if creating a new edge.
- * @param {string | null} toNode - The ID of the ending node if creating a new edge.
- */
 function showWeightDialog(edge = null, fromNode = null, toNode = null) {
-    // Reset state
     edgeToEditId = null;
     
-    // Determine if editing or creating
     if (edge) {
-        // Editing existing edge
         edgeToEditId = edge.id;
         weightDialogTitle.innerText = `Edit Edge Weight (${edge.from} → ${edge.to})`;
         weightInput.value = edge.weight !== undefined ? edge.weight : 1;
     } else if (fromNode && toNode) {
-        // Setting up for new edge creation
         edgeToEditId = null; 
-        edgeStart = fromNode; // Use edgeStart/edgeEnd to temporarily hold new edge nodes
+        edgeStart = fromNode;
         edgeEnd = toNode;
         
         weightDialogTitle.innerText = `Set Weight for New Edge (${fromNode} → ${toNode})`;
-        weightInput.value = 1; // Default to 1 for new edge
+        weightInput.value = 1;
     } else {
-        return; // Should not happen
+        return;
     }
     
     weightDialog.style.display = "block";
@@ -578,20 +563,31 @@ function showWeightDialog(edge = null, fromNode = null, toNode = null) {
 
 function hideWeightDialog() {
     weightDialog.style.display = "none";
-    // If an edge was being created, reset the nodes and colors
+    
+    // Reset starting node color if cancelling edge creation
     if (edgeStart && edgeToEditId === null) {
         nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
     }
+    
+    // RESET ALL EDGE CREATION STATE
     edgeToEditId = null;
     edgeStart = null;
     edgeEnd = null;
 }
 
 function confirmWeightEdit() {
-    const newWeight = parseInt(weightInput.value, 10);
+    const inputValue = weightInput.value.trim();
     
-    if (isNaN(newWeight) || newWeight < 0) {
-        alert("Invalid input. Weight must be a non-negative integer.");
+    // Better validation
+    if (inputValue === '' || isNaN(inputValue)) {
+        alert("Please enter a valid weight value.");
+        return;
+    }
+    
+    const newWeight = parseInt(inputValue, 10);
+    
+    if (newWeight < 0) {
+        alert("Weight must be a non-negative integer.");
         return;
     }
     
@@ -612,12 +608,12 @@ function confirmWeightEdit() {
         // --- Creating New Edge ---
         createEdge(edgeStart, edgeEnd, newWeight);
         
-        // Reset the starting node color after creation
         nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
     }
     
     hideWeightDialog();
 }
+
 weightInput.addEventListener("keypress", function(event) {
     if (event.key === "Enter" && weightDialog.style.display === "block") {
         confirmWeightEdit();
@@ -625,12 +621,10 @@ weightInput.addEventListener("keypress", function(event) {
     }
 });
 
-// ===================== EDGE WEIGHT EDITING (Right-Click Override) ====================
+// ===================== EDGE WEIGHT EDITING (Right-Click) ====================
 network.on("oncontextmenu", function(params) {
-    // Prevent default browser menu
     params.event.preventDefault(); 
     
-    // Optional: If an edge is right-clicked, still open the dialog
     if (params.edges.length === 1) {
         const edgeId = params.edges[0];
         const currentEdge = edges.get(edgeId);
@@ -638,15 +632,19 @@ network.on("oncontextmenu", function(params) {
     }
 });
 
-// ===================== NODE CREATION / EDGE LOGIC (UPDATED mode label) ===========================
+// ===================== NODE/EDGE CREATION LOGIC ====================
 function toggleEdgeMode() {
     edgeMode = !edgeMode;
-    // Reset edge creation state
+    
+    // COMPLETE RESET of edge creation state
     if (edgeStart) {
         nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
     }
     edgeStart = null;
-    edgeEnd = null; // Resetting end node
+    edgeEnd = null;
+    
+    // Hide any open dialogs
+    hideWeightDialog();
     
     document.getElementById("modeLabel").innerText =
         edgeMode ? "Mode: Add Directed Edge" : "Mode: Node Creation";
@@ -656,12 +654,11 @@ network.on("click", function(params) {
     const clickedNodes = params.nodes;
     const clickedEdges = params.edges;
     
-    // --- Left-Click on edge label check (for editing) ---
+    // --- Priority 1: Edge label editing (highest priority) ---
     if (clickedEdges && clickedEdges.length === 1) {
         const edgeId = clickedEdges[0];
         const currentEdge = edges.get(edgeId);
         
-        // Calculate midpoint (where the label is)
         const canvasPos = params.pointer.canvas;
         const edgePositions = network.getPositions([currentEdge.from, currentEdge.to]);
         const fromPos = edgePositions[currentEdge.from];
@@ -670,14 +667,13 @@ network.on("click", function(params) {
         const midY = (fromPos.y + toPos.y) / 2;
         const distance = Math.sqrt(Math.pow(canvasPos.x - midX, 2) + Math.pow(canvasPos.y - midY, 2));
         
-        if (distance < 30) {
+        if (distance < 50) { // Increased from 30 to 50
             showWeightDialog(currentEdge);
-            return; // Dialog opened, stop further processing
+            return; // CRITICAL: Stop here
         }
     }
     
-    // --- Node/Edge Creation Logic Below: ---
-    
+    // --- Priority 2: Edge mode ---
     if (edgeMode) {
         if (!clickedNodes || clickedNodes.length !== 1) {
             return; 
@@ -686,34 +682,34 @@ network.on("click", function(params) {
         
         if (!edgeStart) {
             edgeStart = nodeId;
-            nodes.update({ id: nodeId, color: "#FFD700" }); // Highlight start node
+            nodes.update({ id: nodeId, color: "#FFD700" });
+            return; // Stop here
         } else if (edgeStart !== nodeId) {
             edgeEnd = nodeId;
             
             const edgeId = `${edgeStart}->${edgeEnd}`; 
             if (edges.get(edgeId)) {
                 alert(`Edge already exists from ${edgeStart} to ${edgeEnd}!`);
-                // Reset state
                 nodes.update({ id: edgeStart, color: "#FFA4A4" }); 
                 edgeStart = null;
                 edgeEnd = null;
                 return;
             }
             
-            // Open dialog to set weight for new edge (A -> B)
-            showWeightDialog(null, edgeStart, edgeEnd); 
+            showWeightDialog(null, edgeStart, edgeEnd);
+            return; // Stop here
         }
     } else {
-        // --- NODE CREATION MODE LOGIC (Left-Click on empty space) ---
+        // --- Priority 3: Node creation (lowest priority) ---
         if (clickedNodes && clickedNodes.length > 0) {
-            return; 
+            return; // Don't create node if clicking existing node
         }
         const canvasPoint = params.pointer.canvas;
-        showNodeDialog(canvasPoint.x, params.pointer.canvas.y);
+        showNodeDialog(canvasPoint.x, canvasPoint.y);
     }
 });
 
-// --- UPDATED: Add Node clears redo stack ---
+// ===================== ADD NODE/EDGE FUNCTIONS ====================
 function addNode(label, x, y, fixed=true) {
     if (nodes.get(label)) {
         alert("A node with this name already exists!");
@@ -728,45 +724,40 @@ function addNode(label, x, y, fixed=true) {
     };
     nodes.add(nodeData);
     actionStack.push({ type: "addNode", node: nodeData });
-    redoStack.length = 0; // Clear redo stack on new action
+    redoStack.length = 0;
 }
 
-// --- UPDATED: Create Edge now ONLY takes explicit weight ---
 function createEdge(n1, n2, weight) {
-    // Directed edge ID: n1 -> n2
     const edgeId = `${n1}->${n2}`; 
 
-    // Check only for existing edge in the EXACT direction n1 -> n2
     const existingEdge = edges.get(edgeId);
 
     if (existingEdge) {
         return; 
     }
 
-    // Ensure weight is passed and valid (it should be from the dialog or random generator)
     const calculatedWeight = (weight !== undefined && !isNaN(weight) && weight >= 0) ? weight : 1; 
 
     const edge = {
-        id: edgeId, // Directed ID
+        id: edgeId,
         from: n1,
         to: n2,
         label: "w=" + calculatedWeight,
-        weight: calculatedWeight, // Stored weight
+        weight: calculatedWeight,
         title: `Weight: ${calculatedWeight}`,
         manualWeight: true, 
-        // Set smooth parameters to ensure curved edge if a reverse edge exists
         smooth: {
             enabled: true,
-            type: 'curvedCW', // Use 'curvedCW' for consistent curving
-            roundness: 0.15 // Ensure separation
+            type: 'curvedCW',
+            roundness: 0.15
         }
     };
     edges.add(edge);
     actionStack.push({ type: "addEdge", edge });
-    redoStack.length = 0; // Clear redo stack on new action
+    redoStack.length = 0;
 }
 
-// ===================== RANDOM GRAPH GENERATOR (UPDATED for Redo Stack and explicit weights) ============================
+// ===================== RANDOM GRAPH GENERATOR ============================
 
 function createRandomGraph() {
     const numNodes = parseInt(document.getElementById("numNodes").value);
@@ -777,7 +768,6 @@ function createRandomGraph() {
         alert("Please enter a valid number of nodes (min 2).");
         return;
     }
-    // Max directed edges is N * (N - 1)
     const maxEdges = numNodes * (numNodes - 1); 
     if (isNaN(numEdges) || numEdges < 0 || numEdges > maxEdges) {
         alert(`Please enter a valid number of edges (0 to ${maxEdges} for ${numNodes} nodes).`);
@@ -787,22 +777,21 @@ function createRandomGraph() {
     // 2. Clear Existing Graph
     nodes.clear();
     edges.clear();
-    actionStack.length = 0; // Clear undo history
-    redoStack.length = 0; // Clear redo history
+    actionStack.length = 0;
+    redoStack.length = 0;
     document.getElementById("resultTable").innerHTML = "";
 
-    // 3. Define canvas bounds based on the element size
+    // 3. Define canvas bounds
     const width = container.clientWidth;
     const height = container.clientHeight;
     
     const buffer = 50;
-    // Calculate network's internal coordinate boundaries
     const minX = -width / 2 + buffer;
     const maxX = width / 2 - buffer;
     const minY = -height / 2 + buffer;
     const maxY = height / 2 - buffer;
 
-    // 4. Create Nodes with scattered fixed positions
+    // 4. Create Nodes
     const nodeLabels = [];
     const newNodes = [];
 
@@ -813,43 +802,48 @@ function createRandomGraph() {
             id: label, 
             label: label, 
             color: "#FFA4A4",
-            // Set random positions inside the calculated bounds
             x: Math.random() * (maxX - minX) + minX,
             y: Math.random() * (maxY - minY) + minY,
-            fixed: { x: true, y: true } // Fixed position, no physics needed
+            fixed: { x: true, y: true }
         });
     }
     nodes.add(newNodes);
 
-    // 5. Create Random Edges (Now directed)
+    // 5. Create Random Edges with timeout protection
     const generatedEdgeIds = new Set();
     let edgesCreated = 0;
+    let attempts = 0;
+    const maxAttempts = numEdges * 10; // Prevent infinite loops
     
-    while (edgesCreated < numEdges) {
+    while (edgesCreated < numEdges && attempts < maxAttempts) {
+        attempts++;
+        
         let n1 = nodeLabels[Math.floor(Math.random() * numNodes)];
         let n2 = nodeLabels[Math.floor(Math.random() * numNodes)];
 
         if (n1 === n2) continue;
         
-        // Directed edge ID
         const edgeId = `${n1}->${n2}`; 
 
         if (!generatedEdgeIds.has(edgeId)) {
-            // Generate a random weight between 1 and 20
             const randomWeight = Math.floor(Math.random() * 20) + 1; 
-            createEdge(n1, n2, randomWeight); // Pass the weight explicitly
+            createEdge(n1, n2, randomWeight);
             generatedEdgeIds.add(edgeId);
             edgesCreated++;
         }
     }
     
-    // 6. Fit to view once to ensure all scattered nodes are visible
+    if (edgesCreated < numEdges) {
+        alert(`Could only create ${edgesCreated} out of ${numEdges} edges. Try fewer edges or more nodes.`);
+    }
+    
+    // 6. Fit to view
     network.fit({ 
         padding: 10 
     }); 
 }
 
-// ===================== UNDO/REDO LOGIC (NEW/UPDATED) ============================
+// ===================== UNDO/REDO LOGIC ============================
 
 function undo() {
     if (actionStack.length === 0) {
@@ -858,7 +852,7 @@ function undo() {
     }
 
     const last = actionStack.pop();
-    redoStack.push(last); // Move action to redo stack
+    redoStack.push(last);
 
     if (last.type === "addNode") {
         nodes.remove(last.node.id);
@@ -867,6 +861,11 @@ function undo() {
 
     if (last.type === "addEdge") {
         edges.remove(last.edge.id);
+        return;
+    }
+    
+    if (last.type === "removeEdge") {
+        edges.add(last.edge);
         return;
     }
 }
@@ -878,61 +877,53 @@ function redo() {
     }
 
     const next = redoStack.pop();
-    actionStack.push(next); // Move action back to action stack
+    actionStack.push(next);
 
     if (next.type === "addNode") {
-        // Re-add the node using the stored data (including position)
         nodes.add(next.node); 
         return;
     }
 
     if (next.type === "addEdge") {
-        // Re-add the edge using the stored data
         edges.add(next.edge);
+        return;
+    }
+    
+    if (next.type === "removeEdge") {
+        edges.remove(next.edge.id);
         return;
     }
 }
 
-// ===================== RESET FUNCTIONALITY (UPDATED) =====================
+// ===================== RESET FUNCTIONALITY =====================
 
-/**
- * Resets the entire graph visualizer: nodes, edges, undo history, and results table.
- */
 function resetGraph() {
-    // Clear graph data
     nodes.clear();
     edges.clear();
     
-    // Clear undo history
     actionStack.length = 0;
-    redoStack.length = 0; // Clear redo history
+    redoStack.length = 0;
     
-    // Clear results table and start node input
     document.getElementById("resultTable").innerHTML = "";
     document.getElementById("startNode").value = "";
     
-    // FIX: Resetting the Node and Edge count inputs to defaults
     document.getElementById("numNodes").value = "";
     document.getElementById("numEdges").value = "";
     
-    // Reset mode label and edge state
     document.getElementById("modeLabel").innerText = "Mode: Node Creation";
     edgeMode = false;
     edgeStart = null;
     edgeEnd = null;
 }
 
-// ===================== BFS UTILITIES (Updated for Directed Graph) ===========================
+// ===================== BFS UTILITIES ===========================
 
 function getAdj() {
     const adj = {};
     nodes.get().forEach(n => adj[n.id] = []);
 
     edges.get().forEach(e => {
-        // BFS treats all edges as weight 1 (1 hop), regardless of the stored 'e.weight'.
-        // This is a directed graph adjacency list now.
         adj[e.from].push({ node: e.to, weight: 1 });
-        // NOTE: No reverse edge added here, as the graph is now explicitly directed.
     });
 
     return adj;
@@ -940,7 +931,6 @@ function getAdj() {
 
 async function highlightStep(id) {
     nodes.update({ id, color: "#FFD700" });
-    // Increase timeout slightly for better visualization of steps
     await new Promise(r => setTimeout(r, 750)); 
     nodes.update({ id, color: "#FFA4A4" });
 }
@@ -952,11 +942,22 @@ async function runBFS() {
         nodes.update({ id, color: "#FFA4A4" });
     });
     
-    const start = document.getElementById("startNode").value.trim();
-    const adj = getAdj(); // Uses the new directed adjacency list
+    const startInput = document.getElementById("startNode").value.trim();
+    const adj = getAdj();
+    
+    // Find matching node (case-insensitive)
+    let start = null;
+    const allNodes = Object.keys(adj);
+    
+    for (let node of allNodes) {
+        if (node.toLowerCase() === startInput.toLowerCase()) {
+            start = node;
+            break;
+        }
+    }
 
-    if (!adj[start]) {
-        alert("Invalid start node!");
+    if (!start) {
+        alert(`Node "${startInput}" not found! Available nodes: ${allNodes.join(', ')}`);
         return;
     }
 
